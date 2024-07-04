@@ -1,0 +1,6 @@
+fastapi==0.111.0
+librosa==0.9.2
+numpy==1.22.3
+scikit_learn==1.5.1
+torch==1.12.1
+transformers==4.42.3

@@ -1,4 +1,3 @@
-from huggingsound import SpeechRecognitionModel
 import warnings
 from typing import Iterator, Optional
 import numpy as np
