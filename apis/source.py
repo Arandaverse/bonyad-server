@@ -5,9 +5,7 @@ from getClosestQuestion import router as get_closest_question
 app = FastAPI()
 
 origins = [
-    "http://localhost",
-    "http://localhost:3000",
-    "http://localhost:3001",  # React app origin
+    "*"
 ]
 
 app.add_middleware(

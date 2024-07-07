@@ -28,3 +28,8 @@ async def get_closest_question(file: UploadFile = File(...)):
     os.remove(audio_path)
 
     return result
+
+
+@router.get('/get-closest-question')
+async def test():
+    return "kire khar"

@@ -6,6 +6,8 @@ import librosa
 from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from sentence_transformers import SentenceTransformer, util
+import random
 
 
 def get_waveforms(pahts: list[str], sampling_rate: Optional[int] = 16000) -> list[np.ndarray]:
@@ -55,43 +57,51 @@ def inference(audio_paths: list[str]):
 def determine_closest_sentence(question: str):
     # List of Persian texts
     texts = [
-        "درباره کتاب های خود صحبت کنید.",
-        "در مورد زندگی خود بگید.",
+        "درباره کتاب های خود بگویید.",
+        "درباره زندگی خود بگویید.",
         "یک نصیحت کوتاه بگویید."
     ]
 
     # New Persian text to compare
     new_text = question
+    print("question", new_text)
 
-    # Initialize TfidfVectorizer
-    vectorizer = TfidfVectorizer()
+    # Load a pre-trained model
+    model = SentenceTransformer('../models/sentence_transformer')
 
-    # Combine the texts and the new text for TF-IDF calculation
-    combined_texts = texts + [new_text]
-
-    # Fit and transform the texts to a TF-IDF representation
-    tfidf_matrix = vectorizer.fit_transform(combined_texts)
+    # Encode the texts and the new text
+    embeddings = model.encode(texts + [new_text])
 
     # Calculate cosine similarity between the new text and all other texts
-    cosine_similarities = cosine_similarity(tfidf_matrix[-1], tfidf_matrix[:-1])
+    cosine_similarities = util.pytorch_cos_sim(embeddings[-1], embeddings[:-1])
 
     # Print the similarities
     for i, similarity in enumerate(cosine_similarities[0]):
-        print(f"Similarity with text {i + 1}: {similarity:.4f}")
+        print(f"Similarity with text {i + 1}: {similarity.item():.4f}")
 
-    # If you want to find the most similar text
-    most_similar_index = cosine_similarities[0].argmax()
+    # Find the most similar text
+    most_similar_index = cosine_similarities[0].argmax().item()
+    most_similar_score = cosine_similarities[0][most_similar_index].item()
+
     print(
-        f"The most similar text is: '{texts[most_similar_index]}' with a similarity score of {cosine_similarities[0][most_similar_index]:.4f}")
+        f"The most similar text is: '{texts[most_similar_index]}' with a similarity score of {most_similar_score:.4f}")
 
-    if cosine_similarities[0][most_similar_index] > 0.3:
+    if most_similar_score > 0.5:
+        response_index = 0
+        if most_similar_index < 2:
+            response_index = most_similar_index + 1
+        else:
+            response_index = random.randint(3, 5)
         return {"similar_question": texts[most_similar_index],
-                "similarity": cosine_similarities[0][most_similar_index]}
-
+                "similarity": most_similar_score,
+                "response_index": response_index}
     else:
         return {"similar_question": "",
-                "similarity": 0}
+                "similarity": 0,
+                "response_index": 0}
 
-# audio_paths = ['zendegi.mp3']
+# question = "درباره زندگی نامه خود بگویید."
+# result = determine_closest_sentence(question)
+# print(result)
 #
-# inference(audio_paths)
+# api_key = AIzaSyBTklF1FPjavaBJL7RO0EW65uZVAccP6hI
