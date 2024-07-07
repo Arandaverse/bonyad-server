@@ -4,36 +4,19 @@ import numpy as np
 import torch
 import librosa
 from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer, util
 import random
 
 
-def get_waveforms(pahts: list[str], sampling_rate: Optional[int] = 16000) -> list[np.ndarray]:
-    """
-    Get waveforms from audio files.
-
-    Parameters:
-    ----------
-        pahts: list[str]
-            paths to audio files
-
-        sampling_rate: Optional[int] = 16000
-            sampling rate of waveforms
-
-    Returns:
-    ----------
-        list[np.ndarray]: waveforms from audio files
-    """
-
+def get_waveforms(paths: list[str], sampling_rate: Optional[int] = 16000) -> list[np.ndarray]:
     waveforms = []
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        for path in pahts:
+        for path in paths:
+            print(f"Loading file from path: {path}")  # Debug log
+            print("before librosa loading")
             waveform, sr = librosa.load(path, sr=sampling_rate)
             waveforms.append(waveform)
-
     return waveforms
 
 
@@ -41,8 +24,9 @@ def inference(audio_paths: list[str]):
     processor = Wav2Vec2Processor.from_pretrained('../models/processor')
 
     model = Wav2Vec2ForCTC.from_pretrained('../models/model')
-
+    print("before wavefroms")
     waveforms = get_waveforms(audio_paths)
+    print("after waverforms")
     inputs = processor(waveforms, sampling_rate=16_000, return_tensors="pt", padding=True)
 
     with torch.no_grad():
