@@ -13,9 +13,9 @@ Audio_Dir = '../Public/'
 router = APIRouter()
 
 
-def reencode_audio(input_path: str, output_path: str):
-    command = f"ffmpeg -i {input_path} -ar 16000 {output_path}"
-    subprocess.run(command, shell=True, check=True)
+# def reencode_audio(input_path: str, output_path: str):
+#     command = f"ffmpeg -i {input_path} -ar 16000 {output_path}"
+#     subprocess.run(command, shell=True, check=True)
 
 
 @router.post('/get-closest-question')
