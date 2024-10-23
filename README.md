@@ -19,6 +19,7 @@
 - Place the `models` folder in the project. Folders ai, apis, models and etc should be in the same directory
 
 3) Install requirements
+   
    $ `pip install -r requirements.txt`
 
 > How to run:
